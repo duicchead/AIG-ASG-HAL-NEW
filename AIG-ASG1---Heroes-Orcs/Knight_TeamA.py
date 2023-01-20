@@ -156,8 +156,8 @@ class KnightStateAttacking_TeamA(State):
         if self.knight.current_hp < 270 and self.knight.level >= 3 and num_of_nearby_heroes >= 1:
             self.knight.heal()
 
-        if self.knight.current_hp < 350 and num_of_nearby_opponents == 0: #if no enemies nearby, jus heal
-            self.knight.heal()
+        #if self.knight.current_hp < 350 and num_of_nearby_opponents == 0: #if no enemies nearby, jus heal
+            #self.knight.heal()
 
         # target is gone
         if self.knight.world.get(self.knight.target.id) is None or self.knight.target.ko:

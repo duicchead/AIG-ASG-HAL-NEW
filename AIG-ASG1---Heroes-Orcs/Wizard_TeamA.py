@@ -133,6 +133,7 @@ class WizardStateAttacking_TeamA(State):
 
         State.__init__(self, "attacking")
         self.wizard = wizard
+        self.spam_middle = False
 
     def do_actions(self):
 
@@ -160,9 +161,11 @@ class WizardStateAttacking_TeamA(State):
                         self.wizard.velocity *= self.wizard.maxSpeed
 
                 if enemy_spawn_pos_distance <= self.wizard.min_target_distance:  
-                        self.wizard.ranged_attack(enemy_spawn_pos, self.wizard.explosion_image)
+                    self.wizard.spam_middle = True
+                    self.wizard.ranged_attack(enemy_spawn_pos, self.wizard.explosion_image)
 
                 else:
+                    self.wizard.spam_middle = False
                     self.wizard.ranged_attack(
                         self.wizard.target.position, self.wizard.explosion_image)
 
@@ -175,7 +178,7 @@ class WizardStateAttacking_TeamA(State):
     def check_conditions(self):
 
         # target is gone
-        if self.wizard.world.get(self.wizard.target.id) is None or self.wizard.target.ko:
+        if self.wizard.world.get(self.wizard.target.id) is None and self.wizard.spam_middle == False or self.wizard.target.ko:
             self.wizard.target = None
             return "seeking"
 
