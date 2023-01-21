@@ -60,7 +60,7 @@ class KnightStateSeeking_TeamA(State):
         State.__init__(self, "seeking")
         self.knight = knight
 
-        self.knight.path_graph = self.knight.world.paths[randint(0, len(self.knight.world.paths)-1)]
+        self.knight.path_graph = self.knight.world.paths[1]
 
 
     def do_actions(self):
@@ -189,7 +189,7 @@ class KnightStateKO_TeamA(State):
         if self.knight.current_respawn_time <= 0:
             self.knight.current_respawn_time = self.knight.respawn_time
             self.knight.ko = False
-            self.knight.path_graph = self.knight.world.paths[randint(0, len(self.knight.world.paths)-1)]
+            self.knight.path_graph = self.knight.world.paths[1]
             return "seeking"
             
         return None

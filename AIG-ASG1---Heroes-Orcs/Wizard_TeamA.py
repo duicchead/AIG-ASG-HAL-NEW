@@ -120,15 +120,18 @@ class WizardStateSeeking_TeamA(State):
         self.wizard = wizard
         self.path = []
 
-        self.wizard.path_graph = self.wizard.world.paths[randint(
-            0, len(self.wizard.world.paths)-1)]
+        self.wizard.path_graph = self.wizard.world.paths[1]
 
         
 
     def do_actions(self):
-        
+        knight = self.wizard.world.get_knight(self.wizard)
 
-        self.wizard.velocity = self.wizard.move_target.position - self.wizard.position
+        if ((self.wizard.position - knight.position).length() < 800): #if wizard and knight are close, move
+            self.wizard.velocity = self.wizard.move_target.position - self.wizard.position
+        else: #if not close, stay still
+            self.wizard.velocity = self.wizard.position - self.wizard.position
+
         if self.wizard.velocity.length() > 0:
             self.wizard.velocity.normalize_ip()
             self.wizard.velocity *= self.wizard.maxSpeed
@@ -188,18 +191,18 @@ class WizardStateSeeking_TeamA(State):
         nearest_node = self.wizard.path_graph.get_nearest_node(
             self.wizard.position)
         
-        # self.path = pathFindAStar(self.wizard.path_graph,
-        #                                 nearest_node,
-        #                                 self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
-
-        knight = self.wizard.world.get_knight(self.wizard)
-        if self.path != knight.seeking_state.path:
-            self.path = knight.seeking_state.path
-
-        else:
-            self.path = pathFindAStar(self.wizard.path_graph,
+        self.path = pathFindAStar(self.wizard.path_graph,
                                         nearest_node,
                                         self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
+
+        # knight = self.wizard.world.get_knight(self.wizard)
+        # if self.path != knight.seeking_state.path:
+        #     self.path = knight.seeking_state.path
+
+        # else:
+        #     self.path = pathFindAStar(self.wizard.path_graph,
+        #                                 nearest_node,
+        #                                 self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
 
         self.path_length = len(self.path)
 
@@ -324,8 +327,7 @@ class WizardStateKO_TeamA(State):
         if self.wizard.current_respawn_time <= 0:
             self.wizard.current_respawn_time = self.wizard.respawn_time
             self.wizard.ko = False
-            self.wizard.path_graph = self.wizard.world.paths[randint(
-                0, len(self.wizard.world.paths)-1)]
+            self.wizard.path_graph = self.wizard.world.paths[1]
             return "seeking"
 
         return None
