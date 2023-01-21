@@ -127,7 +127,7 @@ class WizardStateSeeking_TeamA(State):
     def do_actions(self):
         knight = self.wizard.world.get_knight(self.wizard)
 
-        if ((self.wizard.position - knight.position).length() < 800): #if wizard and knight are close, move
+        if ((self.wizard.position - knight.position).length() < 1000): #if wizard and knight are close, move
             self.wizard.velocity = self.wizard.move_target.position - self.wizard.position
         else: #if not close, stay still
             self.wizard.velocity = self.wizard.position - self.wizard.position

@@ -202,7 +202,7 @@ class ArcherStateAttacking_TeamA(State):
         # opponent within range
         #opponent_distance = (self.archer.position - self.archer.target.position).length()
         # if opponent_distance <= self.archer.min_target_distance:
-        if nearest_opponent.max_hp >= 400 and nearest_opponent.melee_cooldown is not None or nearest_opponent.max_hp == 100 and opponent_distance <= self.archer.min_target_distance:
+        if  opponent_distance <= self.archer.min_target_distance:
             if self.archer.current_ranged_cooldown == self.archer.ranged_cooldown:
                 self.archer.target = nearest_opponent
                 return "kiting"
