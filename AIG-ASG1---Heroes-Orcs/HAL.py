@@ -266,7 +266,7 @@ class World(object):
 
     def get_knight(self,char):
         for entity in self.entities.values():
-            if entity.team_id == char.team_id and entity.team_id != 2 and 400 >= entity.max_hp <= 499: #if on my team and is a knight
+            if entity.team_id == 0 and 400 >= entity.max_hp <= 499: #if on my team and is a knight
                 return entity
 
     def get_wizard(self,char):

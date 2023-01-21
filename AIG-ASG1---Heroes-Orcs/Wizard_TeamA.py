@@ -6,6 +6,8 @@ from Graph import *
 from Character import *
 from State import *
 
+from timeit import default_timer as timer
+
 
 class Wizard_TeamA(Character):
 
@@ -16,6 +18,7 @@ class Wizard_TeamA(Character):
         self.projectile_image = projectile_image
         self.explosion_image = explosion_image
 
+        self.path = []
         self.base = base
         self.position = position
         self.move_target = GameEntity(world, "wizard_move_target", None)
@@ -115,6 +118,7 @@ class WizardStateSeeking_TeamA(State):
 
         State.__init__(self, "seeking")
         self.wizard = wizard
+        self.path = []
 
         self.wizard.path_graph = self.wizard.world.paths[randint(
             0, len(self.wizard.world.paths)-1)]
@@ -122,6 +126,7 @@ class WizardStateSeeking_TeamA(State):
         
 
     def do_actions(self):
+        
 
         self.wizard.velocity = self.wizard.move_target.position - self.wizard.position
         if self.wizard.velocity.length() > 0:
@@ -135,7 +140,23 @@ class WizardStateSeeking_TeamA(State):
         if opponent_distance > 200 and self.wizard.current_hp < self.wizard.max_hp:
             self.wizard.heal()
 
-        
+
+        #WIZARD FOLLOW KNIGHT MOVEMENT#
+        # knight = self.wizard.world.get_knight(self.wizard)
+     
+        # if self.path != knight.brain.active_state.path:
+        #     self.path = knight.brain.active_state.path
+
+        # self.path_length = len(self.path)
+
+        # if (self.path_length > 0):
+        #     self.current_connection = 0
+        #     self.wizard.move_target.position = self.path[0].fromNode.position
+
+        # else:
+        #     self.wizard.move_target.position = self.wizard.path_graph.nodes[
+        #         self.wizard.base.target_node_index].position
+        #WIZARD FOLLOW KNIGHT MOVEMENT#
 
     def check_conditions(self):
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
@@ -163,12 +184,22 @@ class WizardStateSeeking_TeamA(State):
         return None
 
     def entry_actions(self):
+        
         nearest_node = self.wizard.path_graph.get_nearest_node(
             self.wizard.position)
-     
-        self.path = pathFindAStar(self.wizard.path_graph,
-                                    nearest_node,
-                                    self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
+        
+        # self.path = pathFindAStar(self.wizard.path_graph,
+        #                                 nearest_node,
+        #                                 self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
+
+        knight = self.wizard.world.get_knight(self.wizard)
+        if self.path != knight.seeking_state.path:
+            self.path = knight.seeking_state.path
+
+        else:
+            self.path = pathFindAStar(self.wizard.path_graph,
+                                        nearest_node,
+                                        self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
 
         self.path_length = len(self.path)
 

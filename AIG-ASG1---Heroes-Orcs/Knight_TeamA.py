@@ -23,11 +23,11 @@ class Knight_TeamA(Character):
         self.melee_damage = 20
         self.melee_cooldown = 2.
 
-        seeking_state = KnightStateSeeking_TeamA(self)
+        self.seeking_state = KnightStateSeeking_TeamA(self)
         attacking_state = KnightStateAttacking_TeamA(self)
         ko_state = KnightStateKO_TeamA(self)
 
-        self.brain.add_state(seeking_state)
+        self.brain.add_state(self.seeking_state)
         self.brain.add_state(attacking_state)
         self.brain.add_state(ko_state)
 
