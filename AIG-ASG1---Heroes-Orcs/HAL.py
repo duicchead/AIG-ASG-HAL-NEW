@@ -233,6 +233,8 @@ class World(object):
 
         return temp
 
+
+
     def get_all_nearby_heroes(self,char):
         temp = 0
         for entity in self.entities.values():
@@ -241,6 +243,8 @@ class World(object):
                 temp += 1
 
         return temp
+
+
 
     def is_my_wizard_nearby(self,char):
         temp = 0
@@ -260,6 +264,16 @@ class World(object):
 
         return temp
 
+    def get_knight(self,char):
+        for entity in self.entities.values():
+            if entity.team_id == char.team_id and entity.team_id != 2 and 400 >= entity.max_hp <= 499: #if on my team and is a knight
+                return entity
+
+    def get_wizard(self,char):
+        for entity in self.entities.values():
+            if entity.team_id == char.team_id and entity.team_id != 2 and 150 >= entity.max_hp <= 199:
+                return entity
+
     def is_enemybase_inrange(self,char):
         for entity in self.entities.values():
             if entity.team_id == 1 and entity.spawn_node_index == 4:
@@ -268,7 +282,12 @@ class World(object):
 
     def enemy_base(self,char):
         for entity in self.entities.values():
-            if entity.team_id == 1 and entity.max_hp == 1000:
+            if entity.team_id != char.team_id and entity.max_hp == 1000:
+                return entity
+
+    def my_base(self,char):
+        for entity in self.entities.values():
+            if entity.team_id == char.team_id and entity.max_hp == 1000:
                 return entity
 
     def enemy_tower(self,char):
@@ -604,3 +623,4 @@ if __name__ == "__main__":
 
 
         
+#

@@ -31,11 +31,13 @@ class Wizard_TeamA(Character):
         attacking_state = WizardStateAttacking_TeamA(self)
         ko_state = WizardStateKO_TeamA(self)
         kiting_state = WizardStateKiting_TeamA(self)
+        followingknight_state = WizardStateFollowingKnight_TeamA(self)
 
         self.brain.add_state(seeking_state)
         self.brain.add_state(attacking_state)
         self.brain.add_state(ko_state)
         self.brain.add_state(kiting_state)
+        self.brain.add_state(followingknight_state)
 
         self.brain.set_state("seeking")
 
@@ -57,6 +59,55 @@ class Wizard_TeamA(Character):
             else:
                 self.level_up(level_up_stats[3])
 
+class WizardStateFollowingKnight_TeamA(State):
+    def __init__(self, wizard):
+
+        State.__init__(self, "followingknight")
+        self.wizard = wizard
+
+    def do_actions(self):
+        knight = self.wizard.world.get_knight(self.wizard)
+        self.wizard.velocity = knight.position - self.wizard.position
+        if self.wizard.velocity.length() > 0:
+            self.wizard.velocity.normalize_ip()
+            self.wizard.velocity *= self.wizard.maxSpeed
+        
+
+        return None
+
+    def check_conditions(self):
+        mybase = self.wizard.world.my_base(self.wizard)
+        distance_from_mybase = (self.wizard.position - mybase.position).length()
+        if distance_from_mybase > 350:
+            return "seeking"
+
+    def entry_actions(self):
+        #enemy_base = self.wizard.world.enemy_base(self.wizard)
+        #enemy_spawn_pos = enemy_base.spawn_position
+        #enemy_spawn_pos_distance = (self.wizard.position - enemy_spawn_pos).length()
+        # knight = self.wizard.world.get_knight(self.wizard)
+
+        # nearest_node = self.wizard.path_graph.get_nearest_node(
+        #     self.wizard.position)
+        # nearest_knight_node = knight.path_graph.get_nearest_node(knight.position)
+
+        # if knight.ko == False: #if knight is alive and im close enough to my own base
+        #     self.path = pathFindAStar(self.wizard.path_graph,
+        #                             nearest_node,
+        #                             nearest_knight_node)
+
+        #     self.path_length = len(self.path)
+
+        #     if (self.path_length > 0):
+        #         self.current_connection = 0
+        #         self.wizard.move_target.position = self.path[0].fromNode.position
+
+        #     else:
+        #         self.wizard.move_target.position = knight.position
+
+        return None
+
+
 
 class WizardStateSeeking_TeamA(State):
 
@@ -67,6 +118,8 @@ class WizardStateSeeking_TeamA(State):
 
         self.wizard.path_graph = self.wizard.world.paths[randint(
             0, len(self.wizard.world.paths)-1)]
+
+        
 
     def do_actions(self):
 
@@ -81,6 +134,8 @@ class WizardStateSeeking_TeamA(State):
 
         if opponent_distance > 200 and self.wizard.current_hp < self.wizard.max_hp:
             self.wizard.heal()
+
+        
 
     def check_conditions(self):
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
@@ -108,13 +163,12 @@ class WizardStateSeeking_TeamA(State):
         return None
 
     def entry_actions(self):
-
         nearest_node = self.wizard.path_graph.get_nearest_node(
             self.wizard.position)
-
+     
         self.path = pathFindAStar(self.wizard.path_graph,
-                                  nearest_node,
-                                  self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
+                                    nearest_node,
+                                    self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
 
         self.path_length = len(self.path)
 
