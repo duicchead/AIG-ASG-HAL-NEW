@@ -5,15 +5,17 @@ from Graph import *
 
 from Character import *
 from State import *
-
-from timeit import default_timer as timer
+from GameEntity import *
 
 
 class Wizard_TeamA(Character):
 
     def __init__(self, world, image, projectile_image, base, position, explosion_image=None):
 
-        Character.__init__(self, world, "wizard", image)
+        Character.__init__(self, world, "Mywizard", image)
+
+        self.entities = {}
+        self.entity_id = 0
 
         self.projectile_image = projectile_image
         self.explosion_image = explosion_image
@@ -62,6 +64,12 @@ class Wizard_TeamA(Character):
             else:
                 self.level_up(level_up_stats[3])
 
+    def enemy_base(self):
+        for entity in self.entities.values():
+            if entity.name == "base" and entity.team_id == 1 - self.knight.entity.team_id:
+                return entity
+
+
 class WizardStateFollowingKnight_TeamA(State):
     def __init__(self, wizard):
 
@@ -69,18 +77,18 @@ class WizardStateFollowingKnight_TeamA(State):
         self.wizard = wizard
 
     def do_actions(self):
-        knight = self.wizard.world.get_knight(self.wizard)
+        knight = get_knight(self.wizard)
         self.wizard.velocity = knight.position - self.wizard.position
         if self.wizard.velocity.length() > 0:
             self.wizard.velocity.normalize_ip()
             self.wizard.velocity *= self.wizard.maxSpeed
-        
 
         return None
 
     def check_conditions(self):
-        mybase = self.wizard.world.my_base(self.wizard)
-        distance_from_mybase = (self.wizard.position - mybase.position).length()
+        mybase = my_base(self.wizard)
+        distance_from_mybase = (self.wizard.position -
+                                mybase.position).length()
         if distance_from_mybase > 350:
             return "seeking"
 
@@ -111,7 +119,6 @@ class WizardStateFollowingKnight_TeamA(State):
         return None
 
 
-
 class WizardStateSeeking_TeamA(State):
 
     def __init__(self, wizard):
@@ -122,14 +129,17 @@ class WizardStateSeeking_TeamA(State):
 
         self.wizard.path_graph = self.wizard.world.paths[1]
 
-        
-
     def do_actions(self):
-        knight = self.wizard.world.get_knight(self.wizard)
+        knight = self.wizard.world.get_entity("Myknight")
 
-        if ((self.wizard.position - knight.position).length() < 1000): #if wizard and knight are close, move
+        # knight_name = self.wizard.world.entities.name
+        # knight = self.wizard.world.get_entity(
+        #     self.wizard, knight_name="knight")
+
+        # if wizard and knight are close, move
+        if ((self.wizard.position - knight.position).length() < 1000):
             self.wizard.velocity = self.wizard.move_target.position - self.wizard.position
-        else: #if not close, stay still
+        else:  # if not close, stay still
             self.wizard.velocity = self.wizard.position - self.wizard.position
 
         if self.wizard.velocity.length() > 0:
@@ -143,10 +153,9 @@ class WizardStateSeeking_TeamA(State):
         if opponent_distance > 200 and self.wizard.current_hp < self.wizard.max_hp:
             self.wizard.heal()
 
-
-        #WIZARD FOLLOW KNIGHT MOVEMENT#
+        # WIZARD FOLLOW KNIGHT MOVEMENT#
         # knight = self.wizard.world.get_knight(self.wizard)
-     
+
         # if self.path != knight.brain.active_state.path:
         #     self.path = knight.brain.active_state.path
 
@@ -159,14 +168,14 @@ class WizardStateSeeking_TeamA(State):
         # else:
         #     self.wizard.move_target.position = self.wizard.path_graph.nodes[
         #         self.wizard.base.target_node_index].position
-        #WIZARD FOLLOW KNIGHT MOVEMENT#
+        # WIZARD FOLLOW KNIGHT MOVEMENT#
 
     def check_conditions(self):
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
         opponent_distance = (self.wizard.position -
                              nearest_opponent.position).length()
-        #if opponent_distance > 300 and self.wizard.current_hp < 100:
-            #self.wizard.heal()
+        # if opponent_distance > 300 and self.wizard.current_hp < 100:
+        # self.wizard.heal()
 
         # check if opponent is in range
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
@@ -187,13 +196,13 @@ class WizardStateSeeking_TeamA(State):
         return None
 
     def entry_actions(self):
-        
+
         nearest_node = self.wizard.path_graph.get_nearest_node(
             self.wizard.position)
-        
+
         self.path = pathFindAStar(self.wizard.path_graph,
-                                        nearest_node,
-                                        self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
+                                  nearest_node,
+                                  self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
 
         # knight = self.wizard.world.get_knight(self.wizard)
         # if self.path != knight.seeking_state.path:
@@ -229,28 +238,31 @@ class WizardStateAttacking_TeamA(State):
                              self.wizard.target.position).length()
 
         # opponent within range
-        is_knight_nearby = self.wizard.world.get_all_nearby_opponents(self.wizard)
+        is_knight_nearby = self.wizard.world.get_all_nearby_opponents(
+            self.wizard)
         if opponent_distance <= self.wizard.min_target_distance:
 
-            enemy_base = self.wizard.world.enemy_base(self.wizard)
-
-            #nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
-
-            enemy_spawn_pos = enemy_base.spawn_position
-            enemy_spawn_pos_distance = (self.wizard.position - enemy_spawn_pos).length()
+            # enemy_knight = self.wizard.world.get_entity("knight")
+            # base = enemy_knight.world.get_entity("base")
+            Ebase = self.wizard.get_entity()
+            enemy_spawn_pos = Ebase.spawn_position
+            enemy_spawn_pos_distance = (
+                self.wizard.position - enemy_spawn_pos).length()
 
             self.wizard.velocity = Vector2(0, 0)
             if self.wizard.current_ranged_cooldown <= 0:
 
-                if enemy_spawn_pos_distance <= 250 and is_knight_nearby == 1: #if near base, move towards the enemy spawn point, once enemy spawn point is in range, fire at it
+                # if near base, move towards the enemy spawn point, once enemy spawn point is in range, fire at it
+                if enemy_spawn_pos_distance <= 250 and is_knight_nearby == 1:
                     self.wizard.velocity = enemy_spawn_pos - self.wizard.position
                     if self.wizard.velocity.length() > 0:
                         self.wizard.velocity.normalize_ip()
                         self.wizard.velocity *= self.wizard.maxSpeed
 
-                if enemy_spawn_pos_distance <= self.wizard.min_target_distance:  
+                if enemy_spawn_pos_distance <= self.wizard.min_target_distance:
                     self.wizard.spam_middle = True
-                    self.wizard.ranged_attack(enemy_spawn_pos, self.wizard.explosion_image)
+                    self.wizard.ranged_attack(
+                        enemy_spawn_pos, self.wizard.explosion_image)
 
                 else:
                     self.wizard.spam_middle = False
@@ -274,11 +286,11 @@ class WizardStateAttacking_TeamA(State):
         opponent_distance = (self.wizard.position -
                              nearest_opponent.position).length()
 
-        #if nearest_opponent.max_hp == 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.wizard.min_target_distance:
+        # if nearest_opponent.max_hp == 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.wizard.min_target_distance:
         if nearest_opponent.melee_damage > 0 and opponent_distance <= self.wizard.min_target_distance:
             if self.wizard.current_ranged_cooldown == self.wizard.ranged_cooldown:
                 self.wizard.target = nearest_opponent
-                #return "kiting"
+                # return "kiting"
 
         return None
 

@@ -82,36 +82,15 @@ class ArcherStateDefending_TeamA(State):
             self.archer.heal()
 
     def check_conditions(self):
-        # if self.archer.current_hp < 50:
-        # self.archer.heal()
 
-        # if near enemy base and knight is there to tank, target tower/base only
-        is_knight_nearby = self.archer.world.get_all_nearby_opponents(
+        nearest_opponent = self.archer.world.get_nearest_opponent(
             self.archer)
-        enemy_base = self.archer.world.enemy_base(self.archer)
-        enemy_tower = self.archer.world.nearest_enemy_tower(self.archer)
-        enemy_spawn_pos = enemy_base.spawn_position
-        enemy_spawn_pos_distance = (
-            self.archer.position - enemy_spawn_pos).length()
-
-        if enemy_spawn_pos_distance <= 250 and is_knight_nearby == 1:
-            if enemy_tower is not None:
-                self.archer.target = enemy_tower
+        if nearest_opponent is not None:
+            opponent_distance = (self.archer.position -
+                                 nearest_opponent.position).length()
+            if opponent_distance <= self.archer.min_target_distance + 150:
+                self.archer.target = nearest_opponent
                 return "attacking"
-            else:
-                self.archer.target = enemy_base
-                return "attacking"
-
-        # check if opponent is in range
-        else:
-            nearest_opponent = self.archer.world.get_nearest_opponent(
-                self.archer)
-            if nearest_opponent is not None:
-                opponent_distance = (self.archer.position -
-                                     nearest_opponent.position).length()
-                if opponent_distance <= self.archer.min_target_distance + 150:
-                    self.archer.target = nearest_opponent
-                    return "attacking"
 
         # if (self.archer.position - self.archer.move_target.position).length() < 8:
 
@@ -202,7 +181,7 @@ class ArcherStateAttacking_TeamA(State):
         # opponent within range
         #opponent_distance = (self.archer.position - self.archer.target.position).length()
         # if opponent_distance <= self.archer.min_target_distance:
-        if  opponent_distance <= self.archer.min_target_distance:
+        if opponent_distance <= self.archer.min_target_distance:
             if self.archer.current_ranged_cooldown == self.archer.ranged_cooldown:
                 self.archer.target = nearest_opponent
                 return "kiting"
