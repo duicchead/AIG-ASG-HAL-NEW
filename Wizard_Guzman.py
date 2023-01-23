@@ -8,7 +8,7 @@ from State import *
 from GameEntity import *
 
 
-class Wizard_TeamA(Character):
+class Wizard_Guzman(Character):
 
     def __init__(self, world, image, projectile_image, base, position, explosion_image=None):
 
@@ -32,10 +32,10 @@ class Wizard_TeamA(Character):
         self.projectile_range = 100
         self.projectile_speed = 100
 
-        seeking_state = WizardStateSeeking_TeamA(self)
-        attacking_state = WizardStateAttacking_TeamA(self)
-        ko_state = WizardStateKO_TeamA(self)
-        kiting_state = WizardStateKiting_TeamA(self)
+        seeking_state = WizardStateSeeking_Guzman(self)
+        attacking_state = WizardStateAttacking_Guzman(self)
+        ko_state = WizardStateKO_Guzman(self)
+        kiting_state = WizardStateKiting_Guzman(self)
 
         self.brain.add_state(seeking_state)
         self.brain.add_state(attacking_state)
@@ -113,7 +113,7 @@ class Wizard_TeamA(Character):
                 return entity
 
 
-class WizardStateSeeking_TeamA(State):
+class WizardStateSeeking_Guzman(State):
 
     def __init__(self, wizard):
 
@@ -268,7 +268,7 @@ class WizardStateSeeking_TeamA(State):
                 self.wizard.base.target_node_index].position
 
 
-class WizardStateAttacking_TeamA(State):
+class WizardStateAttacking_Guzman(State):
 
     def __init__(self, wizard):
 
@@ -314,11 +314,16 @@ class WizardStateAttacking_TeamA(State):
                     self.wizard.ranged_attack(
                         self.wizard.target.position, self.wizard.explosion_image)
 
-                if prime_pos_distance <= self.wizard.min_target_distance: #if prime hitting spot is in my target range, attack it
+                if prime_pos_distance <= self.wizard.min_target_distance: #if prime hitting spot is in my target range, attack it; IMPORTANT; can just replace targetpos with prime_spot
+                    fireballposition = Character(self.wizard.world, "fireballposition", None, False)
+                    self.wizard.target = fireballposition
+                    self.wizard.target.ko = False
+                    self.wizard.target.position = prime_spot
+
                     self.wizard.velocity = self.wizard.position - self.wizard.position
                     self.wizard.spam_middle = True
                     self.wizard.ranged_attack(
-                        prime_spot, self.wizard.explosion_image)
+                        self.wizard.target.position, self.wizard.explosion_image)
 
         # else:
         #     self.wizard.velocity = self.wizard.target.position - self.wizard.position
@@ -350,7 +355,7 @@ class WizardStateAttacking_TeamA(State):
         return None
 
 
-class WizardStateKiting_TeamA(State):
+class WizardStateKiting_Guzman(State):
     def __init__(self, wizard):
 
         State.__init__(self, "kiting")
@@ -373,7 +378,7 @@ class WizardStateKiting_TeamA(State):
         return None
 
 
-class WizardStateKO_TeamA(State):
+class WizardStateKO_Guzman(State):
 
     def __init__(self, wizard):
 

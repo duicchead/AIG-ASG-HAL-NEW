@@ -7,7 +7,7 @@ from Character import *
 from State import *
 
 
-class Archer_TeamA(Character):
+class Archer_Guzman(Character):
 
     def __init__(self, world, image, projectile_image, base, position):
 
@@ -26,10 +26,10 @@ class Archer_TeamA(Character):
         self.projectile_range = 100
         self.projectile_speed = 100
 
-        defending_state = ArcherStateDefending_TeamA(self)
-        kiting_state = ArcherStateKiting_TeamA(self)
-        attacking_state = ArcherStateAttacking_TeamA(self)
-        ko_state = ArcherStateKO_TeamA(self)
+        defending_state = ArcherStateDefending_Guzman(self)
+        kiting_state = ArcherStateKiting_Guzman(self)
+        attacking_state = ArcherStateAttacking_Guzman(self)
+        ko_state = ArcherStateKO_Guzman(self)
 
         self.brain.add_state(defending_state)
         self.brain.add_state(kiting_state)
@@ -57,7 +57,7 @@ class Archer_TeamA(Character):
                 self.level_up(level_up_stats[3])
 
 
-class ArcherStateDefending_TeamA(State):
+class ArcherStateDefending_Guzman(State):
 
     def __init__(self, archer):
 
@@ -121,7 +121,7 @@ class ArcherStateDefending_TeamA(State):
                 self.archer.base.target_node_index].position
 
 
-class ArcherStateKiting_TeamA(State):
+class ArcherStateKiting_Guzman(State):
     def __init__(self, archer):
 
         State.__init__(self, "kiting")
@@ -144,7 +144,7 @@ class ArcherStateKiting_TeamA(State):
         return None
 
 
-class ArcherStateAttacking_TeamA(State):
+class ArcherStateAttacking_Guzman(State):
 
     def __init__(self, archer):
 
@@ -193,7 +193,7 @@ class ArcherStateAttacking_TeamA(State):
         return None
 
 
-class ArcherStateKO_TeamA(State):
+class ArcherStateKO_Guzman(State):
 
     def __init__(self, archer):
 
