@@ -154,15 +154,19 @@ class WizardStateSeeking_TeamA(State):
         knight_ebase_pos = (enemy_base.position - knight.position).length()
         wizard_ebase_pos = (enemy_base.position - self.wizard.position).length()
 
-        # knight_name = self.wizard.world.entities.name
-        # knight = self.wizard.world.get_entity(
-        #     self.wizard, knight_name="knight")
+        if my_base.team_id == 0:
+            range1 = 565
+            range2 = 490
+        
+        elif my_base.team_id == 1:
+            range1 = 0
+            range2 = 0
 
         # if wizard and knight are close, move
-        if (knight_base_pos < 565 and wizard_base_pos < 565):
+        if (knight_base_pos < range1 and wizard_base_pos < range1):
             self.wizard.velocity = knight.position - self.wizard.position
 
-        elif (knight_base_pos >= 565 and wizard_base_pos >= 565):
+        elif (knight_base_pos >= range1 and wizard_base_pos >= range1):
             self.wizard.velocity = knight.position - self.wizard.position
 
         else: 
@@ -186,7 +190,7 @@ class WizardStateSeeking_TeamA(State):
             #astar ===========================================================
             self.wizard.velocity = self.wizard.move_target.position - self.wizard.position
 
-        if (wizard_ebase_pos < 490):
+        if (wizard_ebase_pos < range2):
             #astar =============================================================
             nearest_node = self.wizard.path_graph.get_nearest_node(
                 self.wizard.position)

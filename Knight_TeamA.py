@@ -115,32 +115,21 @@ class KnightStateSeeking_TeamA(State):
         my_base = self.knight.my_base(self.knight)
         knight_base_pos = (my_base.position - self.knight.position).length()
 
-        if (knight_ebase_pos < 870 and wizard_ebase_pos < 870):
+        if my_base.team_id == 0:
+            range1 = 870
+            range2 = 600
+        
+        elif my_base.team_id == 1:
+            range1 = 0
+            range2 = 0
+
+        if (knight_ebase_pos < range1 and wizard_ebase_pos < range1):
             self.knight.move_target.position = enemy_base.position
 
-        if knight_base_pos < 600 and wizard.brain.active_state.name == "ko":
+        if knight_base_pos < range2 and wizard.brain.active_state.name == "ko":
             self.knight.velocity = wizard.position - self.knight.position
 
         else:
-            #astar =============================================================
-            # nearest_node = self.knight.path_graph.get_nearest_node(
-            #     self.knight.position)
-
-            # self.path = pathFindAStar(self.knight.path_graph,
-            #                           nearest_node,
-            #                           self.knight.path_graph.nodes[self.knight.base.target_node_index])
-
-            # self.path_length = len(self.path)
-
-            # if (self.path_length > 0):
-            #     self.current_connection = 0
-            #     self.knight.move_target.position = self.path[0].fromNode.position
-
-            # else:
-            #     self.knight.move_target.position = self.knight.path_graph.nodes[
-            #         self.knight.base.target_node_index].position
-            #astar ===========================================================
-
             self.knight.velocity = self.knight.move_target.position - self.knight.position
 
         if self.knight.velocity.length() > 0:
