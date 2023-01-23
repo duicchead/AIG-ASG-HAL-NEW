@@ -36,12 +36,14 @@ class Wizard_TeamA(Character):
         attacking_state = WizardStateAttacking_TeamA(self)
         ko_state = WizardStateKO_TeamA(self)
         kiting_state = WizardStateKiting_TeamA(self)
+        waiting_state = WizardStateWaiting_TeamA(self)
         # followingknight_state = WizardStateFollowingKnight_TeamA(self)
 
         self.brain.add_state(seeking_state)
         self.brain.add_state(attacking_state)
         self.brain.add_state(ko_state)
         self.brain.add_state(kiting_state)
+        self.brain.add_state(waiting_state)
         # self.brain.add_state(followingknight_state)
 
         self.brain.set_state("seeking")
@@ -209,8 +211,8 @@ class WizardStateSeeking_TeamA(State):
         else:
             self.wizard.velocity = self.wizard.move_target.position - self.wizard.position
 
-        if (wizard_ebase_pos < 500):
-            self.wizard.velocity = enemy_base.position - self.wizard.position
+        # if (wizard_ebase_pos < 500):
+        #     self.wizard.velocity = enemy_base.position - self.wizard.position
 
         if self.wizard.velocity.length() > 0:
             self.wizard.velocity.normalize_ip()
@@ -241,6 +243,8 @@ class WizardStateSeeking_TeamA(State):
         # WIZARD FOLLOW KNIGHT MOVEMENT#
 
     def check_conditions(self):
+
+        knight = self.wizard.world.get_entity("Myknight")
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
         opponent_distance = (self.wizard.position -
                              nearest_opponent.position).length()
@@ -262,6 +266,9 @@ class WizardStateSeeking_TeamA(State):
             if self.current_connection < self.path_length:
                 self.wizard.move_target.position = self.path[self.current_connection].toNode.position
                 self.current_connection += 1
+
+        if knight.brain.active_state.name == "ko":
+            return "waiting"
 
         return None
 
@@ -386,6 +393,48 @@ class WizardStateKiting_TeamA(State):
         # larger number, longer it takes for wizard to escape kiting state and go back to attacking. 1.75 just nice?
         if self.wizard.current_ranged_cooldown <= self.wizard.ranged_cooldown / 1.5:
             return "attacking"
+
+    def entry_actions(self):
+
+        return None
+
+
+class WizardStateWaiting_TeamA(State):
+    def __init__(self, wizard):
+
+        State.__init__(self, "waiting")
+        self.wizard = wizard
+
+        self.wizard.path_graph = self.wizard.world.paths[1]
+
+    def do_actions(self):
+
+        mybase = self.wizard.my_base(self.wizard)
+        nearest_node = self.wizard.path_graph.get_nearest_node(
+            self.wizard.position)
+
+        self.path = pathFindAStar(self.wizard.path_graph,
+                                  nearest_node,
+                                  self.wizard.path_graph.nodes[mybase.target_node_index])
+
+        self.path_length = len(self.path)
+
+        if (self.path_length > 0):
+            self.current_connection = 0
+            self.wizard.move_target.position = self.path[0].fromNode.position
+
+        else:
+            self.wizard.move_target.position = self.wizard.path_graph.nodes[
+                self.wizard.base.target_node_index].position
+
+        return None
+
+    def check_conditions(self):
+
+        knight = self.wizard.world.get_entity("Myknight")
+
+        if knight.brain.active_state.name != "ko":
+            return "seeking"
 
     def entry_actions(self):
 

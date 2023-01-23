@@ -30,10 +30,12 @@ class Knight_TeamA(Character):
         self.seeking_state = KnightStateSeeking_TeamA(self)
         attacking_state = KnightStateAttacking_TeamA(self)
         ko_state = KnightStateKO_TeamA(self)
+        waiting_state = KnightStateWaiting_TeamA(self)
 
         self.brain.add_state(self.seeking_state)
         self.brain.add_state(attacking_state)
         self.brain.add_state(ko_state)
+        self.brain.add_state(waiting_state)
 
         self.brain.set_state("seeking")
 
@@ -58,7 +60,10 @@ class Knight_TeamA(Character):
             if entity.name == "base" and entity.team_id == 1 - char.team_id:
                 return entity
 
-
+    def my_base(self, char):
+        for entity in self.world.entities.values():
+            if entity.name == "base" and entity.team_id == char.team_id:
+                return entity
 
 
 class KnightStateSeeking_TeamA(State):
@@ -73,13 +78,18 @@ class KnightStateSeeking_TeamA(State):
     def do_actions(self):
         wizard = self.knight.world.get_entity("Mywizard")
         enemy_base = self.knight.enemy_base(self.knight)
-        knight_ebase_pos = (enemy_base.position - self.knight.position).length()
+        knight_ebase_pos = (enemy_base.position -
+                            self.knight.position).length()
         wizard_ebase_pos = (enemy_base.position - wizard.position).length()
 
-        if (knight_ebase_pos < 870 and wizard_ebase_pos < 870):
-            self.knight.move_target.position = enemy_base.position
+        if wizard is not None:
+            if (knight_ebase_pos < 870 and wizard_ebase_pos < 870):
+                self.knight.move_target.position = enemy_base.position
+            self.knight.velocity = self.knight.move_target.position - self.knight.position
 
-        self.knight.velocity = self.knight.move_target.position - self.knight.position
+        else:
+            self.knight.velocity = 0
+
         if self.knight.velocity.length() > 0:
             self.knight.velocity.normalize_ip()
             self.knight.velocity *= self.knight.maxSpeed
@@ -88,6 +98,8 @@ class KnightStateSeeking_TeamA(State):
 
         # check if opponent is in range
         nearest_opponent = self.knight.world.get_nearest_opponent(self.knight)
+        wizard = self.knight.world.get_entity("Mywizard")
+
         if nearest_opponent is not None:
             opponent_distance = (self.knight.position -
                                  nearest_opponent.position).length()
@@ -106,16 +118,19 @@ class KnightStateSeeking_TeamA(State):
                 self.knight.move_target.position = self.path[self.current_connection].toNode.position
                 self.current_connection += 1
 
+        if wizard.brain.active_state.name == "ko":
+            return "waiting"
+
         return None
 
     def entry_actions(self):
-        
+
         nearest_node = self.knight.path_graph.get_nearest_node(
             self.knight.position)
 
         self.path = pathFindAStar(self.knight.path_graph,
-                                nearest_node,
-                                self.knight.path_graph.nodes[self.knight.base.target_node_index])
+                                  nearest_node,
+                                  self.knight.path_graph.nodes[self.knight.base.target_node_index])
 
         self.path_length = len(self.path)
 
@@ -191,7 +206,52 @@ class KnightStateAttacking_TeamA(State):
         return None
 
     def exit_actions(self):
-        
+
+        return None
+
+
+class KnightStateWaiting_TeamA(State):
+
+    def __init__(self, knight):
+
+        State.__init__(self, "waiting")
+        self.knight = knight
+
+        self.knight.path_graph = self.knight.world.paths[1]
+
+    def do_actions(self):
+
+        mybase = self.knight.my_base(self.knight)
+        nearest_node = self.knight.path_graph.get_nearest_node(
+            self.knight.position)
+
+        self.path = pathFindAStar(self.knight.path_graph,
+                                  nearest_node,
+                                  self.knight.path_graph.nodes[mybase.target_node_index])
+
+        self.path_length = len(self.path)
+
+        if (self.path_length > 0):
+            self.current_connection = 0
+            self.knight.move_target.position = self.path[0].fromNode.position
+
+        else:
+            self.knight.move_target.position = self.knight.path_graph.nodes[
+                self.knight.base.target_node_index].position
+
+        return None
+
+    def check_conditions(self):
+
+        # respawned
+        wizard = self.knight.world.get_entity("Mywizard")
+
+        if wizard.brain.active_state.name != "ko":
+            return "seeking"
+
+        return None
+
+    def entry_actions(self):
 
         return None
 
