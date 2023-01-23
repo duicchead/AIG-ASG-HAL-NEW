@@ -280,9 +280,9 @@ class WizardStateAttacking_Guzman(State):
     def do_actions(self):
         knight = self.wizard.get_knight(self.wizard)
         Ebase = self.wizard.enemy_base(self.wizard)
-        enemy_spawn_pos = Ebase.spawn_position
+        #enemy_spawn_pos = Ebase.spawn_position
         
-        is_tower_down = self.wizard.is_tower_down(self.wizard)
+        #is_tower_down = self.wizard.is_tower_down(self.wizard)
 
         temp = self.wizard.pos_between_enemy_towers(self.wizard)
         if temp.x != 0 and temp.y != 0:

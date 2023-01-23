@@ -197,9 +197,9 @@ class KnightStateAttacking_Guzman(State):
                            wizard.position).length()
         
         Ebase = self.knight.enemy_base(self.knight)
-        enemy_spawn_pos = Ebase.spawn_position
+        #enemy_spawn_pos = Ebase.spawn_position
 
-        is_tower_down = self.knight.is_tower_down(self.knight)
+        #is_tower_down = self.knight.is_tower_down(self.knight)
 
         temp = self.knight.pos_between_enemy_towers(self.knight)
         if temp.x != 0 and temp.y != 0:
