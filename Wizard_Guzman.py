@@ -90,7 +90,7 @@ class Wizard_Guzman(Character):
             tempyvalue = (tower1.position.y - tower2.position.y)/2 + tower2.position.y
 
             xvalue = (spawnposx - tempxvalue)/2 + tempxvalue - 7.5
-            yvalue = (spawnposy - tempyvalue)/2 + tempyvalue
+            yvalue = (spawnposy - tempyvalue)/2 + tempyvalue + 6
 
         else:
             xvalue = 0
@@ -159,8 +159,8 @@ class WizardStateSeeking_Guzman(State):
             range2 = 490
         
         elif my_base.team_id == 1:
-            range1 = 0
-            range2 = 0
+            range1 = 850
+            range2 = 340
 
         # if wizard and knight are close, move
         if (knight_base_pos < range1 and wizard_base_pos < range1):
@@ -275,6 +275,7 @@ class WizardStateAttacking_Guzman(State):
         State.__init__(self, "attacking")
         self.wizard = wizard
         self.spam_middle = False
+        self.prime_position = Vector2(0,0)
 
     def do_actions(self):
         knight = self.wizard.get_knight(self.wizard)
@@ -285,17 +286,17 @@ class WizardStateAttacking_Guzman(State):
 
         temp = self.wizard.pos_between_enemy_towers(self.wizard)
         if temp.x != 0 and temp.y != 0:
+            self.prime_position = temp
             prime_spot = temp
 
         else:
-            prime_spot = enemy_spawn_pos
+            prime_spot = self.prime_position
         #pos = self.wizard.position_between_enemy_towers(self.wizard)
 
         opponent_distance = (self.wizard.position -
                              self.wizard.target.position).length()
 
         # opponent within range
-        
         if opponent_distance <= self.wizard.min_target_distance:
             
             prime_pos_distance = (self.wizard.position - prime_spot).length()
@@ -303,27 +304,54 @@ class WizardStateAttacking_Guzman(State):
             self.wizard.velocity = Vector2(0, 0)
             if self.wizard.current_ranged_cooldown <= 0: #if ready to fire
 
-                if prime_pos_distance <= 250: # if near the prime hitting spot, move towards the spot
+                if prime_pos_distance <= 270 and knight.level >= 2: # if near the prime hitting spot, move towards the spot
                     self.wizard.velocity = prime_spot - self.wizard.position
                     if self.wizard.velocity.length() > 0:
                         self.wizard.velocity.normalize_ip()
                         self.wizard.velocity *= self.wizard.maxSpeed
 
+                    if prime_pos_distance <= self.wizard.min_target_distance and (knight.position - self.wizard.position).length() <= self.wizard.min_target_distance: #if prime hitting spot is in my target range, attack it; IMPORTANT; can just replace targetpos with prime_spot
+                        # fireballposition = Character(self.wizard.world, "fireballposition", None, False)
+                        # self.wizard.target = fireballposition
+                        # self.wizard.target.ko = False
+                        # self.wizard.target.position = prime_spot
+
+                        self.wizard.target = knight
+                        self.wizard.velocity = self.wizard.position - self.wizard.position
+
+                        self.wizard.spam_middle = True
+                        self.wizard.ranged_attack(
+                            self.wizard.target.position, self.wizard.explosion_image)
+
+                    if (knight.position - self.wizard.position).length() >= 275: # if not near prime hitting spot, hit whatever is in range of me
+                        self.wizard.spam_middle = False
+                        nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
+                        if nearest_opponent is not None:
+                            opponent_distance = (self.wizard.position -
+                                                nearest_opponent.position).length()
+                            if opponent_distance <= self.wizard.min_target_distance:
+                                self.wizard.target = nearest_opponent
+
+                        self.wizard.spam_middle = False
+                        self.wizard.ranged_attack(
+                            self.wizard.target.position, self.wizard.explosion_image)
+
+
                 else: # if not near prime hitting spot, hit whatever is in range of me
+                    self.wizard.spam_middle = False
+                    nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
+                    if nearest_opponent is not None:
+                        opponent_distance = (self.wizard.position -
+                                            nearest_opponent.position).length()
+                        if opponent_distance <= self.wizard.min_target_distance:
+                            self.wizard.target = nearest_opponent
+
                     self.wizard.spam_middle = False
                     self.wizard.ranged_attack(
                         self.wizard.target.position, self.wizard.explosion_image)
 
-                if prime_pos_distance <= self.wizard.min_target_distance: #if prime hitting spot is in my target range, attack it; IMPORTANT; can just replace targetpos with prime_spot
-                    fireballposition = Character(self.wizard.world, "fireballposition", None, False)
-                    self.wizard.target = fireballposition
-                    self.wizard.target.ko = False
-                    self.wizard.target.position = prime_spot
+                
 
-                    self.wizard.velocity = self.wizard.position - self.wizard.position
-                    self.wizard.spam_middle = True
-                    self.wizard.ranged_attack(
-                        self.wizard.target.position, self.wizard.explosion_image)
 
         # else:
         #     self.wizard.velocity = self.wizard.target.position - self.wizard.position
