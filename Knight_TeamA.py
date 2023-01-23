@@ -100,6 +100,13 @@ class KnightStateSeeking_TeamA(State):
         nearest_opponent = self.knight.world.get_nearest_opponent(self.knight)
         wizard = self.knight.world.get_entity("Mywizard")
 
+        Ebase = self.knight.enemy_base(self.knight)
+        Ebase_distance = (self.knight.position -
+                          Ebase.position).length()
+        Mybase = self.knight.my_base(self.knight)
+        Mybase_distance = (self.knight.position -
+                           Mybase.position).length()
+
         if nearest_opponent is not None:
             opponent_distance = (self.knight.position -
                                  nearest_opponent.position).length()
@@ -118,7 +125,7 @@ class KnightStateSeeking_TeamA(State):
                 self.knight.move_target.position = self.path[self.current_connection].toNode.position
                 self.current_connection += 1
 
-        if wizard.brain.active_state.name == "ko":
+        if wizard.brain.active_state.name == "ko" and Ebase_distance >= 800 and Mybase_distance >= 670:
             return "waiting"
 
         return None
@@ -227,7 +234,7 @@ class KnightStateWaiting_TeamA(State):
 
         self.path = pathFindAStar(self.knight.path_graph,
                                   nearest_node,
-                                  self.knight.path_graph.nodes[mybase.target_node_index])
+                                  self.knight.path_graph.nodes[mybase.spawn_node_index])
 
         self.path_length = len(self.path)
 
@@ -237,7 +244,7 @@ class KnightStateWaiting_TeamA(State):
 
         else:
             self.knight.move_target.position = self.knight.path_graph.nodes[
-                self.knight.base.target_node_index].position
+                self.knight.base.spawn_node_index].position
 
         return None
 

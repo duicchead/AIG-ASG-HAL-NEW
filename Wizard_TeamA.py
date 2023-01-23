@@ -211,8 +211,8 @@ class WizardStateSeeking_TeamA(State):
         else:
             self.wizard.velocity = self.wizard.move_target.position - self.wizard.position
 
-        # if (wizard_ebase_pos < 500):
-        #     self.wizard.velocity = enemy_base.position - self.wizard.position
+        if (wizard_ebase_pos < 500):
+            self.wizard.velocity = enemy_base.position - self.wizard.position
 
         if self.wizard.velocity.length() > 0:
             self.wizard.velocity.normalize_ip()
@@ -248,6 +248,10 @@ class WizardStateSeeking_TeamA(State):
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
         opponent_distance = (self.wizard.position -
                              nearest_opponent.position).length()
+        Ebase = self.wizard.enemy_base(self.wizard)
+        Ebase_distance = (self.wizard.position -
+                          Ebase.position).length()
+
         # if opponent_distance > 300 and self.wizard.current_hp < 100:
         # self.wizard.heal()
 
@@ -267,7 +271,7 @@ class WizardStateSeeking_TeamA(State):
                 self.wizard.move_target.position = self.path[self.current_connection].toNode.position
                 self.current_connection += 1
 
-        if knight.brain.active_state.name == "ko":
+        if knight.brain.active_state.name == "ko" and Ebase_distance >= 800:
             return "waiting"
 
         return None
@@ -415,7 +419,7 @@ class WizardStateWaiting_TeamA(State):
 
         self.path = pathFindAStar(self.wizard.path_graph,
                                   nearest_node,
-                                  self.wizard.path_graph.nodes[mybase.target_node_index])
+                                  self.wizard.path_graph.nodes[mybase.spawn_node_index])
 
         self.path_length = len(self.path)
 
@@ -425,7 +429,7 @@ class WizardStateWaiting_TeamA(State):
 
         else:
             self.wizard.move_target.position = self.wizard.path_graph.nodes[
-                self.wizard.base.target_node_index].position
+                self.wizard.base.spawn_node_index].position
 
         return None
 

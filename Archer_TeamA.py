@@ -136,7 +136,7 @@ class ArcherStateKiting_TeamA(State):
 
     def check_conditions(self):
         # larger number, longer it takes for archer to escape kiting state and go back to attacking. 1.75 just nice?
-        if self.archer.current_ranged_cooldown <= self.archer.ranged_cooldown / 1.6:
+        if self.archer.current_ranged_cooldown <= self.archer.ranged_cooldown / 1.7:
             return "attacking"
 
     def entry_actions(self):
