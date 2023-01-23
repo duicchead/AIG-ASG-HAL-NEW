@@ -72,10 +72,16 @@ class Knight_TeamA(Character):
                     tower1 = entity
                 if temp == 2:
                     tower2 = entity
+            if entity.name == "base" and entity.team_id == 1 - char.team_id:
+                spawnposx = entity.spawn_position[0]
+                spawnposy = entity.spawn_position[1]
 
         if temp == 2:
-            xvalue = (tower1.position.x - tower2.position.x)/2 + tower2.position.x
-            yvalue = (tower1.position.y - tower2.position.y)/2 + tower2.position.y
+            tempxvalue = (tower1.position.x - tower2.position.x)/2 + tower2.position.x
+            tempyvalue = (tower1.position.y - tower2.position.y)/2 + tower2.position.y
+
+            xvalue = (spawnposx - tempxvalue)/2 + tempxvalue - 7.5
+            yvalue = (spawnposy - tempyvalue)/2 + tempyvalue
 
         else:
             xvalue = 0
