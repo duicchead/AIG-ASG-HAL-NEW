@@ -287,39 +287,34 @@ class WizardStateAttacking_TeamA(State):
         # opponent within range
         
         if opponent_distance <= self.wizard.min_target_distance:
-            # enemy_knight = self.wizard.world.get_entity("knight")
-            # base = enemy_knight.world.get_entity("base")
             
-            
-            prime_pos_distance = (
-                self.wizard.position - prime_spot).length()
+            prime_pos_distance = (self.wizard.position - prime_spot).length()
 
             self.wizard.velocity = Vector2(0, 0)
-            if self.wizard.current_ranged_cooldown <= 0:
+            if self.wizard.current_ranged_cooldown <= 0: #if ready to fire
 
-                # if near base, move towards the enemy spawn point, once enemy spawn point is in range, fire at it
-                if prime_pos_distance <= 250:
+                if prime_pos_distance <= 250: # if near the prime hitting spot, move towards the spot
                     self.wizard.velocity = prime_spot - self.wizard.position
                     if self.wizard.velocity.length() > 0:
                         self.wizard.velocity.normalize_ip()
                         self.wizard.velocity *= self.wizard.maxSpeed
 
-                else:
+                else: # if not near prime hitting spot, hit whatever is in range of me
                     self.wizard.spam_middle = False
                     self.wizard.ranged_attack(
                         self.wizard.target.position, self.wizard.explosion_image)
 
-                if prime_pos_distance <= self.wizard.min_target_distance:
+                if prime_pos_distance <= self.wizard.min_target_distance: #if prime hitting spot is in my target range, attack it
                     self.wizard.velocity = self.wizard.position - self.wizard.position
                     self.wizard.spam_middle = True
                     self.wizard.ranged_attack(
                         prime_spot, self.wizard.explosion_image)
 
-        else:
-            self.wizard.velocity = self.wizard.target.position - self.wizard.position
-            if self.wizard.velocity.length() > 0:
-                self.wizard.velocity.normalize_ip()
-                self.wizard.velocity *= self.wizard.maxSpeed
+        # else:
+        #     self.wizard.velocity = self.wizard.target.position - self.wizard.position
+        #     if self.wizard.velocity.length() > 0:
+        #         self.wizard.velocity.normalize_ip()
+        #         self.wizard.velocity *= self.wizard.maxSpeed
 
     def check_conditions(self):
 

@@ -116,6 +116,25 @@ class KnightStateSeeking_TeamA(State):
             self.knight.velocity = wizard.position - self.knight.position
 
         else:
+            #astar =============================================================
+            # nearest_node = self.knight.path_graph.get_nearest_node(
+            #     self.knight.position)
+
+            # self.path = pathFindAStar(self.knight.path_graph,
+            #                           nearest_node,
+            #                           self.knight.path_graph.nodes[self.knight.base.target_node_index])
+
+            # self.path_length = len(self.path)
+
+            # if (self.path_length > 0):
+            #     self.current_connection = 0
+            #     self.knight.move_target.position = self.path[0].fromNode.position
+
+            # else:
+            #     self.knight.move_target.position = self.knight.path_graph.nodes[
+            #         self.knight.base.target_node_index].position
+            #astar ===========================================================
+
             self.knight.velocity = self.knight.move_target.position - self.knight.position
 
         if self.knight.velocity.length() > 0:
@@ -199,7 +218,7 @@ class KnightStateAttacking_TeamA(State):
             self.knight.position - prime_spot).length()
 
         # if near base, move towards the enemy spawn point, once enemy spawn point is in range, fire at it
-        if prime_pos_distance <= 250 and self.knight.level >= 2 and wizard_distance <= 220:
+        if prime_pos_distance <= 200 and self.knight.level >= 2 and wizard_distance <= 175:
             #self.knight.velocity = enemy_spawn_pos - self.knight.position
             self.knight.velocity = prime_spot - self.knight.position
             if self.knight.velocity.length() > 0:
