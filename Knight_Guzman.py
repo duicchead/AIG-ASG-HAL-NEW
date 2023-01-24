@@ -121,7 +121,7 @@ class KnightStateSeeking_Guzman(State):
             #range2 = 600
         
         elif my_base.team_id == 1:
-            range1 = 620
+            range1 = 870
             #range2 = 870
 
         if (knight_base_pos >= range1 and wizard_base_pos >= range1): #if wizard n knight both on bot lane, rush ebase and dont return to node behind
