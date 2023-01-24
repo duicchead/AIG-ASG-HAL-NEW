@@ -30,10 +30,12 @@ class Knight_Guzman(Character):
         self.seeking_state = KnightStateSeeking_Guzman(self)
         attacking_state = KnightStateAttacking_Guzman(self)
         ko_state = KnightStateKO_Guzman(self)
+        waiting_state = KnightStateWaiting_Guzman(self)
 
         self.brain.add_state(self.seeking_state)
         self.brain.add_state(attacking_state)
         self.brain.add_state(ko_state)
+        self.brain.add_state(waiting_state)
 
         self.brain.set_state("seeking")
 
@@ -131,18 +133,25 @@ class KnightStateSeeking_Guzman(State):
         if (knight_base_pos >= range1 and wizard_base_pos >= range1):
             self.knight.move_target.position = enemy_base.position
 
-        # if wizard is ko & knight was along the left lane aft leaving the base, return back to base first
-        if knight_base_pos < range1 and wizard.brain.active_state.name == "ko":
-            self.knight.move_target.position = my_base.position
-
-        else:
-            self.knight.velocity = self.knight.move_target.position - self.knight.position
+        self.knight.velocity = self.knight.move_target.position - self.knight.position
 
         if self.knight.velocity.length() > 0:
             self.knight.velocity.normalize_ip()
             self.knight.velocity *= self.knight.maxSpeed
 
     def check_conditions(self):
+
+        wizard = self.knight.world.get_entity("Mywizard")
+        my_base = self.knight.my_base(self.knight)
+        knight_base_pos = (my_base.position - self.knight.position).length()
+
+        if my_base.team_id == 0:
+            range1 = 620
+            #range2 = 600
+
+        elif my_base.team_id == 1:
+            range1 = 870
+            #range2 = 870
 
         # check if opponent is in range
         nearest_opponent = self.knight.world.get_nearest_opponent(self.knight)
@@ -164,6 +173,9 @@ class KnightStateSeeking_Guzman(State):
                 self.knight.move_target.position = self.path[self.current_connection].toNode.position
                 self.current_connection += 1
 
+        if knight_base_pos < range1 and wizard.brain.active_state.name == "ko":
+            return "waiting"
+
         return None
 
     def entry_actions(self):
@@ -184,6 +196,42 @@ class KnightStateSeeking_Guzman(State):
         else:
             self.knight.move_target.position = self.knight.path_graph.nodes[
                 self.knight.base.target_node_index].position
+
+
+class KnightStateWaiting_Guzman(State):
+
+    def __init__(self, knight):
+
+        State.__init__(self, "waiting")
+        self.knight = knight
+
+    def do_actions(self):
+
+        my_base = self.knight.my_base(self.knight)
+
+        self.knight.velocity = my_base.position - self.knight.position
+        if self.knight.velocity.length() > 0:
+            self.knight.velocity.normalize_ip()
+            self.knight.velocity *= self.knight.maxSpeed
+
+    def check_conditions(self):
+
+        wizard = self.knight.world.get_entity("Mywizard")
+
+        # if wizard is ko & knight was along the left lane aft leaving the base, return back to base first
+        if wizard.brain.active_state.name != "ko":
+            return "seeking"
+
+        else:
+            return None
+
+    def entry_actions(self):
+
+        return None
+
+    def exit_actions(self):
+
+        return None
 
 
 class KnightStateAttacking_Guzman(State):
