@@ -90,7 +90,7 @@ class Wizard_Guzman(Character):
             tempyvalue = (tower1.position.y - tower2.position.y)/2 + tower2.position.y
 
             xvalue = (spawnposx - tempxvalue)/2 + tempxvalue - 7.5
-            yvalue = (spawnposy - tempyvalue)/2 + tempyvalue + 6
+            yvalue = (spawnposy - tempyvalue)/2 + tempyvalue + 8
 
         else:
             xvalue = 0
@@ -304,7 +304,7 @@ class WizardStateAttacking_Guzman(State):
             self.wizard.velocity = Vector2(0, 0)
             if self.wizard.current_ranged_cooldown <= 0: #if ready to fire
 
-                if prime_pos_distance <= 270 and knight.level >= 2: # if near the prime hitting spot, move towards the spot
+                if prime_pos_distance <= 250 and knight.level >= 2: # if near the prime hitting spot, move towards the spot
                     self.wizard.velocity = prime_spot - self.wizard.position
                     if self.wizard.velocity.length() > 0:
                         self.wizard.velocity.normalize_ip()
