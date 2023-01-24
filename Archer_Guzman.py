@@ -61,6 +61,11 @@ class Archer_Guzman(Character):
             if entity.name == "base" and entity.team_id == char.team_id:
                 return entity
 
+    # def colliding(self):
+    #     for entity in self.world.entities.collision_list():
+    #         if entity.name == "obstacle" or entity.name == "base":
+    #             return True
+
 
 class ArcherStateDefending_Guzman(State):
 
@@ -74,6 +79,8 @@ class ArcherStateDefending_Guzman(State):
 
     def do_actions(self):
 
+        # is_colliding = self.archer.colliding(self.archer)
+
         self.archer.velocity = self.archer.move_target.position - self.archer.position
         if self.archer.velocity.length() > 0:
             self.archer.velocity.normalize_ip()
@@ -86,6 +93,26 @@ class ArcherStateDefending_Guzman(State):
         if opponent_distance > 250 and self.archer.current_hp < self.archer.max_hp:
             self.archer.heal()
 
+        # if is_colliding == True:
+
+        #     nearest_node = self.archer.path_graph.get_nearest_node(
+        #         self.archer.position)
+        #     myBase = self.archer.my_base(self.archer)
+
+        #     self.path = pathFindAStar(self.archer.path_graph,
+        #                               nearest_node,
+        #                               self.archer.path_graph.nodes[myBase.spawn_node_index])
+
+        #     self.path_length = len(self.path)
+
+        #     if (self.path_length > 0):
+        #         self.current_connection = 0
+        #         self.archer.move_target.position = self.path[0].fromNode.position
+
+        #     else:
+        #         self.archer.move_target.position = self.archer.path_graph.nodes[
+        #             self.archer.base.spawn_node_index].position
+
     def check_conditions(self):
 
         nearest_opponent = self.archer.world.get_nearest_opponent(
@@ -97,22 +124,11 @@ class ArcherStateDefending_Guzman(State):
                 self.archer.target = nearest_opponent
                 return "attacking"
 
-        # if (self.archer.position - self.archer.move_target.position).length() < 8:
-
-        #     # continue on path
-        #     if self.current_connection < self.path_length:
-        #         self.archer.move_target.position = self.path[self.current_connection].toNode.position
-        #         self.current_connection += 1
-
         return None
 
     def entry_actions(self):
 
         myBase = self.archer.my_base(self.archer)
-        spawnPoint = myBase.spawn_node_index
-        nearest_node = self.archer.path_graph.get_nearest_node(
-            self.archer.position)
-        print(nearest_node.position)
 
         self.path = pathFindAStar(self.archer.path_graph,
                                   self.archer.path_graph.nodes[myBase.spawn_node_index],
