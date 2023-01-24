@@ -56,6 +56,11 @@ class Archer_Guzman(Character):
             else:
                 self.level_up(level_up_stats[3])
 
+    def my_base(self, char):
+        for entity in self.world.entities.values():
+            if entity.name == "base" and entity.team_id == char.team_id:
+                return entity
+
 
 class ArcherStateDefending_Guzman(State):
 
@@ -103,12 +108,15 @@ class ArcherStateDefending_Guzman(State):
 
     def entry_actions(self):
 
+        myBase = self.archer.my_base(self.archer)
+        spawnPoint = myBase.spawn_node_index
         nearest_node = self.archer.path_graph.get_nearest_node(
             self.archer.position)
+        print(nearest_node.position)
 
         self.path = pathFindAStar(self.archer.path_graph,
-                                  nearest_node,
-                                  self.archer.path_graph.nodes[self.archer.base.target_node_index])
+                                  self.archer.path_graph.nodes[myBase.spawn_node_index],
+                                  self.archer.path_graph.nodes[myBase.spawn_node_index])
 
         self.path_length = len(self.path)
 
@@ -118,7 +126,7 @@ class ArcherStateDefending_Guzman(State):
 
         else:
             self.archer.move_target.position = self.archer.path_graph.nodes[
-                self.archer.base.target_node_index].position
+                self.archer.base.spawn_node_index].position
 
 
 class ArcherStateKiting_Guzman(State):

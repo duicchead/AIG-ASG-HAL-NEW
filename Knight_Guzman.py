@@ -77,8 +77,10 @@ class Knight_Guzman(Character):
                 spawnposy = entity.spawn_position[1]
 
         if temp == 2:
-            tempxvalue = (tower1.position.x - tower2.position.x)/2 + tower2.position.x
-            tempyvalue = (tower1.position.y - tower2.position.y)/2 + tower2.position.y
+            tempxvalue = (tower1.position.x - tower2.position.x) / \
+                2 + tower2.position.x
+            tempyvalue = (tower1.position.y - tower2.position.y) / \
+                2 + tower2.position.y
 
             xvalue = (spawnposx - tempxvalue)/2 + tempxvalue - 7.5
             yvalue = (spawnposy - tempyvalue)/2 + tempyvalue + 6
@@ -98,6 +100,7 @@ class Knight_Guzman(Character):
 
         return temp
 
+
 class KnightStateSeeking_Guzman(State):
 
     def __init__(self, knight):
@@ -110,7 +113,8 @@ class KnightStateSeeking_Guzman(State):
     def do_actions(self):
         wizard = self.knight.world.get_entity("Mywizard")
         enemy_base = self.knight.enemy_base(self.knight)
-        knight_ebase_pos = (enemy_base.position - self.knight.position).length()
+        knight_ebase_pos = (enemy_base.position -
+                            self.knight.position).length()
         wizard_ebase_pos = (enemy_base.position - wizard.position).length()
         my_base = self.knight.my_base(self.knight)
         knight_base_pos = (my_base.position - self.knight.position).length()
@@ -118,7 +122,7 @@ class KnightStateSeeking_Guzman(State):
         if my_base.team_id == 0:
             range1 = 870
             range2 = 600
-        
+
         elif my_base.team_id == 1:
             range1 = 600
             range2 = 870
@@ -128,7 +132,7 @@ class KnightStateSeeking_Guzman(State):
 
         if knight_base_pos < range2 and wizard.brain.active_state.name == "ko":
             #self.knight.velocity = wizard.position - self.knight.position
-            self.knight.move_target.position = my_base.position
+            self.knight.velocity = wizard.position - self.knight.position
 
         else:
             self.knight.velocity = self.knight.move_target.position - self.knight.position
@@ -162,13 +166,13 @@ class KnightStateSeeking_Guzman(State):
         return None
 
     def entry_actions(self):
-        
+
         nearest_node = self.knight.path_graph.get_nearest_node(
             self.knight.position)
 
         self.path = pathFindAStar(self.knight.path_graph,
-                                nearest_node,
-                                self.knight.path_graph.nodes[self.knight.base.target_node_index])
+                                  nearest_node,
+                                  self.knight.path_graph.nodes[self.knight.base.target_node_index])
 
         self.path_length = len(self.path)
 
@@ -187,19 +191,16 @@ class KnightStateAttacking_Guzman(State):
 
         State.__init__(self, "attacking")
         self.knight = knight
-        self.prime_position = Vector2(0,0)
-        
+        self.prime_position = Vector2(0, 0)
 
     def do_actions(self):
 
         wizard = self.knight.world.get_entity("Mywizard")
         wizard_distance = (self.knight.position -
                            wizard.position).length()
-        
+
         Ebase = self.knight.enemy_base(self.knight)
         #enemy_spawn_pos = Ebase.spawn_position
-
-        #is_tower_down = self.knight.is_tower_down(self.knight)
 
         temp = self.knight.pos_between_enemy_towers(self.knight)
         if temp.x != 0 and temp.y != 0:
@@ -209,9 +210,6 @@ class KnightStateAttacking_Guzman(State):
         else:
             prime_spot = self.prime_position
 
-        # enemy_knight = self.knight.world.get_entity("knight")
-        # base = enemy_knight.world.get_entity("base")
-        
         prime_pos_distance = (
             self.knight.position - prime_spot).length()
 
@@ -259,7 +257,6 @@ class KnightStateAttacking_Guzman(State):
         return None
 
     def exit_actions(self):
-        
 
         return None
 
