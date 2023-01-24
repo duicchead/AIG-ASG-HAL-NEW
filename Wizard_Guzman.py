@@ -35,12 +35,10 @@ class Wizard_Guzman(Character):
         seeking_state = WizardStateSeeking_Guzman(self)
         attacking_state = WizardStateAttacking_Guzman(self)
         ko_state = WizardStateKO_Guzman(self)
-        kiting_state = WizardStateKiting_Guzman(self)
 
         self.brain.add_state(seeking_state)
         self.brain.add_state(attacking_state)
         self.brain.add_state(ko_state)
-        self.brain.add_state(kiting_state)
 
         self.brain.set_state("seeking")
 
@@ -56,7 +54,6 @@ class Wizard_Guzman(Character):
                           "ranged cooldown", "projectile range"]
         if self.can_level_up():
             self.level += 1
-            #choice = randint(0, len(level_up_stats) - 1)
             if self.level >= 2:
                 self.level_up(level_up_stats[3])
             else:
@@ -86,8 +83,10 @@ class Wizard_Guzman(Character):
                 spawnposy = entity.spawn_position[1]
 
         if temp == 2:
-            tempxvalue = (tower1.position.x - tower2.position.x)/2 + tower2.position.x
-            tempyvalue = (tower1.position.y - tower2.position.y)/2 + tower2.position.y
+            tempxvalue = (tower1.position.x - tower2.position.x) / \
+                2 + tower2.position.x
+            tempyvalue = (tower1.position.y - tower2.position.y) / \
+                2 + tower2.position.y
 
             xvalue = (spawnposx - tempxvalue)/2 + tempxvalue - 7.5
             yvalue = (spawnposy - tempyvalue)/2 + tempyvalue + 8
@@ -125,25 +124,6 @@ class WizardStateSeeking_Guzman(State):
 
     def do_actions(self):
 
-        #astar =============================================================
-        # nearest_node = self.wizard.path_graph.get_nearest_node(
-        #     self.wizard.position)
-
-        # self.path = pathFindAStar(self.wizard.path_graph,
-        #                           nearest_node,
-        #                           self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
-
-        # self.path_length = len(self.path)
-
-        # if (self.path_length > 0):
-        #     self.current_connection = 0
-        #     self.wizard.move_target.position = self.path[0].fromNode.position
-
-        # else:
-        #     self.wizard.move_target.position = self.wizard.path_graph.nodes[
-        #         self.wizard.base.target_node_index].position
-        #astar ===========================================================
-
         knight = self.wizard.world.get_entity("Myknight")
         enemy_base = self.wizard.enemy_base(self.wizard)
         my_base = self.wizard.my_base(self.wizard)
@@ -152,12 +132,13 @@ class WizardStateSeeking_Guzman(State):
         wizard_base_pos = (my_base.position - self.wizard.position).length()
 
         knight_ebase_pos = (enemy_base.position - knight.position).length()
-        wizard_ebase_pos = (enemy_base.position - self.wizard.position).length()
+        wizard_ebase_pos = (enemy_base.position -
+                            self.wizard.position).length()
 
         if my_base.team_id == 0:
             range1 = 565
             range2 = 490
-        
+
         elif my_base.team_id == 1:
             range1 = 850
             range2 = 340
@@ -169,14 +150,14 @@ class WizardStateSeeking_Guzman(State):
         elif (knight_base_pos >= range1 and wizard_base_pos >= range1):
             self.wizard.velocity = knight.position - self.wizard.position
 
-        else: 
-            #astar =============================================================
+        else:
+            # astar =============================================================
             nearest_node = self.wizard.path_graph.get_nearest_node(
                 self.wizard.position)
 
             self.path = pathFindAStar(self.wizard.path_graph,
-                                    nearest_node,
-                                    self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
+                                      nearest_node,
+                                      self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
 
             self.path_length = len(self.path)
 
@@ -187,17 +168,17 @@ class WizardStateSeeking_Guzman(State):
             else:
                 self.wizard.move_target.position = self.wizard.path_graph.nodes[
                     self.wizard.base.target_node_index].position
-            #astar ===========================================================
+            # astar ===========================================================
             self.wizard.velocity = self.wizard.move_target.position - self.wizard.position
 
         if (wizard_ebase_pos < range2):
-            #astar =============================================================
+            # astar =============================================================
             nearest_node = self.wizard.path_graph.get_nearest_node(
                 self.wizard.position)
 
             self.path = pathFindAStar(self.wizard.path_graph,
-                                    nearest_node,
-                                    self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
+                                      nearest_node,
+                                      self.wizard.path_graph.nodes[self.wizard.base.target_node_index])
 
             self.path_length = len(self.path)
 
@@ -208,7 +189,7 @@ class WizardStateSeeking_Guzman(State):
             else:
                 self.wizard.move_target.position = self.wizard.path_graph.nodes[
                     self.wizard.base.target_node_index].position
-            #astar ===========================================================
+            # astar ===========================================================
             self.wizard.velocity = self.wizard.move_target.position - self.wizard.position
 
         if self.wizard.velocity.length() > 0:
@@ -222,13 +203,10 @@ class WizardStateSeeking_Guzman(State):
         if opponent_distance > 200 and self.wizard.current_hp < self.wizard.max_hp:
             self.wizard.heal()
 
-
     def check_conditions(self):
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
         opponent_distance = (self.wizard.position -
                              nearest_opponent.position).length()
-        # if opponent_distance > 300 and self.wizard.current_hp < 100:
-        # self.wizard.heal()
 
         # check if opponent is in range
         nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
@@ -275,14 +253,11 @@ class WizardStateAttacking_Guzman(State):
         State.__init__(self, "attacking")
         self.wizard = wizard
         self.spam_middle = False
-        self.prime_position = Vector2(0,0)
+        self.prime_position = Vector2(0, 0)
 
     def do_actions(self):
         knight = self.wizard.get_knight(self.wizard)
         Ebase = self.wizard.enemy_base(self.wizard)
-        #enemy_spawn_pos = Ebase.spawn_position
-        
-        #is_tower_down = self.wizard.is_tower_down(self.wizard)
 
         temp = self.wizard.pos_between_enemy_towers(self.wizard)
         if temp.x != 0 and temp.y != 0:
@@ -291,31 +266,27 @@ class WizardStateAttacking_Guzman(State):
 
         else:
             prime_spot = self.prime_position
-        #pos = self.wizard.position_between_enemy_towers(self.wizard)
 
         opponent_distance = (self.wizard.position -
                              self.wizard.target.position).length()
 
         # opponent within range
         if opponent_distance <= self.wizard.min_target_distance:
-            
+
             prime_pos_distance = (self.wizard.position - prime_spot).length()
 
             self.wizard.velocity = Vector2(0, 0)
-            if self.wizard.current_ranged_cooldown <= 0: #if ready to fire
+            if self.wizard.current_ranged_cooldown <= 0:  # if ready to fire
 
-                if prime_pos_distance <= 250 and knight.level >= 2: # if near the prime hitting spot, move towards the spot
+                # if near the prime hitting spot, move towards the spot
+                if prime_pos_distance <= 250 and knight.level >= 2:
                     self.wizard.velocity = prime_spot - self.wizard.position
                     if self.wizard.velocity.length() > 0:
                         self.wizard.velocity.normalize_ip()
                         self.wizard.velocity *= self.wizard.maxSpeed
 
-                    if prime_pos_distance <= self.wizard.min_target_distance and (knight.position - self.wizard.position).length() <= self.wizard.min_target_distance: #if prime hitting spot is in my target range, attack it; IMPORTANT; can just replace targetpos with prime_spot
-                        # fireballposition = Character(self.wizard.world, "fireballposition", None, False)
-                        # self.wizard.target = fireballposition
-                        # self.wizard.target.ko = False
-                        # self.wizard.target.position = prime_spot
-
+                    # if prime hitting spot is in my target range, attack it; IMPORTANT; can just replace targetpos with prime_spot
+                    if prime_pos_distance <= self.wizard.min_target_distance and (knight.position - self.wizard.position).length() <= self.wizard.min_target_distance:
                         self.wizard.target = knight
                         self.wizard.velocity = self.wizard.position - self.wizard.position
 
@@ -323,12 +294,14 @@ class WizardStateAttacking_Guzman(State):
                         self.wizard.ranged_attack(
                             self.wizard.target.position, self.wizard.explosion_image)
 
-                    if (knight.position - self.wizard.position).length() >= 275: # if not near prime hitting spot, hit whatever is in range of me
+                    # if not near prime hitting spot, hit whatever is in range of me
+                    if (knight.position - self.wizard.position).length() >= 275:
                         self.wizard.spam_middle = False
-                        nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
+                        nearest_opponent = self.wizard.world.get_nearest_opponent(
+                            self.wizard)
                         if nearest_opponent is not None:
                             opponent_distance = (self.wizard.position -
-                                                nearest_opponent.position).length()
+                                                 nearest_opponent.position).length()
                             if opponent_distance <= self.wizard.min_target_distance:
                                 self.wizard.target = nearest_opponent
 
@@ -336,28 +309,19 @@ class WizardStateAttacking_Guzman(State):
                         self.wizard.ranged_attack(
                             self.wizard.target.position, self.wizard.explosion_image)
 
-
-                else: # if not near prime hitting spot, hit whatever is in range of me
+                else:  # if not near prime hitting spot, hit whatever is in range of me
                     self.wizard.spam_middle = False
-                    nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
+                    nearest_opponent = self.wizard.world.get_nearest_opponent(
+                        self.wizard)
                     if nearest_opponent is not None:
                         opponent_distance = (self.wizard.position -
-                                            nearest_opponent.position).length()
+                                             nearest_opponent.position).length()
                         if opponent_distance <= self.wizard.min_target_distance:
                             self.wizard.target = nearest_opponent
 
                     self.wizard.spam_middle = False
                     self.wizard.ranged_attack(
                         self.wizard.target.position, self.wizard.explosion_image)
-
-                
-
-
-        # else:
-        #     self.wizard.velocity = self.wizard.target.position - self.wizard.position
-        #     if self.wizard.velocity.length() > 0:
-        #         self.wizard.velocity.normalize_ip()
-        #         self.wizard.velocity *= self.wizard.maxSpeed
 
     def check_conditions(self):
 
@@ -366,40 +330,7 @@ class WizardStateAttacking_Guzman(State):
             self.wizard.target = None
             return "seeking"
 
-        nearest_opponent = self.wizard.world.get_nearest_opponent(self.wizard)
-        opponent_distance = (self.wizard.position -
-                             nearest_opponent.position).length()
-
-        # if nearest_opponent.max_hp == 400 or nearest_opponent.max_hp == 100 and opponent_distance <= self.wizard.min_target_distance:
-        if nearest_opponent.melee_damage > 0 and opponent_distance <= self.wizard.min_target_distance:
-            if self.wizard.current_ranged_cooldown == self.wizard.ranged_cooldown:
-                self.wizard.target = nearest_opponent
-                # return "kiting"
-
         return None
-
-    def entry_actions(self):
-
-        return None
-
-
-class WizardStateKiting_Guzman(State):
-    def __init__(self, wizard):
-
-        State.__init__(self, "kiting")
-        self.wizard = wizard
-
-    def do_actions(self):
-
-        self.wizard.velocity = self.wizard.position - self.wizard.target.position
-        if self.wizard.velocity.length() > 0:
-            self.wizard.velocity.normalize_ip()
-            self.wizard.velocity *= self.wizard.maxSpeed
-
-    def check_conditions(self):
-        # larger number, longer it takes for wizard to escape kiting state and go back to attacking. 1.75 just nice?
-        if self.wizard.current_ranged_cooldown <= self.wizard.ranged_cooldown / 1.5:
-            return "attacking"
 
     def entry_actions(self):
 

@@ -50,7 +50,6 @@ class Archer_Guzman(Character):
                           "ranged cooldown", "projectile range"]
         if self.can_level_up():
             self.level += 1
-            #choice = randint(0, len(level_up_stats) - 1)
             if self.level >= 2:
                 self.level_up(level_up_stats[3])
             else:
@@ -60,11 +59,6 @@ class Archer_Guzman(Character):
         for entity in self.world.entities.values():
             if entity.name == "base" and entity.team_id == char.team_id:
                 return entity
-
-    # def colliding(self):
-    #     for entity in self.world.entities.collision_list():
-    #         if entity.name == "obstacle" or entity.name == "base":
-    #             return True
 
 
 class ArcherStateDefending_Guzman(State):
@@ -79,8 +73,6 @@ class ArcherStateDefending_Guzman(State):
 
     def do_actions(self):
 
-        # is_colliding = self.archer.colliding(self.archer)
-
         self.archer.velocity = self.archer.move_target.position - self.archer.position
         if self.archer.velocity.length() > 0:
             self.archer.velocity.normalize_ip()
@@ -89,29 +81,8 @@ class ArcherStateDefending_Guzman(State):
         nearest_opponent = self.archer.world.get_nearest_opponent(self.archer)
         opponent_distance = (self.archer.position -
                              nearest_opponent.position).length()
-        # if opponent_distance > 270 and self.archer.current_hp < 150:
         if opponent_distance > 250 and self.archer.current_hp < self.archer.max_hp:
             self.archer.heal()
-
-        # if is_colliding == True:
-
-        #     nearest_node = self.archer.path_graph.get_nearest_node(
-        #         self.archer.position)
-        #     myBase = self.archer.my_base(self.archer)
-
-        #     self.path = pathFindAStar(self.archer.path_graph,
-        #                               nearest_node,
-        #                               self.archer.path_graph.nodes[myBase.spawn_node_index])
-
-        #     self.path_length = len(self.path)
-
-        #     if (self.path_length > 0):
-        #         self.current_connection = 0
-        #         self.archer.move_target.position = self.path[0].fromNode.position
-
-        #     else:
-        #         self.archer.move_target.position = self.archer.path_graph.nodes[
-        #             self.archer.base.spawn_node_index].position
 
     def check_conditions(self):
 
@@ -123,7 +94,8 @@ class ArcherStateDefending_Guzman(State):
             if opponent_distance <= self.archer.min_target_distance + 150:
                 self.archer.target = nearest_opponent
                 return "attacking"
-
+            else:
+                return None
         return None
 
     def entry_actions(self):
@@ -203,8 +175,6 @@ class ArcherStateAttacking_Guzman(State):
             return "defending"
 
         # opponent within range
-        #opponent_distance = (self.archer.position - self.archer.target.position).length()
-        # if opponent_distance <= self.archer.min_target_distance:
         if opponent_distance <= self.archer.min_target_distance:
             if self.archer.current_ranged_cooldown == self.archer.ranged_cooldown:
                 self.archer.target = nearest_opponent
