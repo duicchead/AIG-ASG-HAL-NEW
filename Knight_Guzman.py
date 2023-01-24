@@ -126,8 +126,8 @@ class KnightStateSeeking_Guzman(State):
 
         if (knight_base_pos >= range1 and wizard_base_pos >= range1): #if wizard n knight both on bot lane, rush ebase and dont return to node behind
             self.knight.move_target.position = enemy_base.position
-
-        if knight_base_pos < range1 and wizard.brain.active_state.name == "ko": #if wizard is ko & knight was along the first path aft leaving the base, return back to base first
+            
+        if knight_base_pos < range1 and wizard.brain.active_state.name == "ko": #if wizard is ko & knight was along the left lane aft leaving the base, return back to base first
             #self.knight.velocity = wizard.position - self.knight.position
             self.knight.move_target.position = my_base.position
 
